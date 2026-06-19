@@ -1,0 +1,76 @@
+name: "cinct"
+description: "Fast, native, cross-platform test result reporter for CI (JUnit, xUnit, NUnit, TRX, TAP, Dart, Mocha)"
+author: "nexdrew"
+branding:
+  icon: "check-circle"
+  color: "green"
+
+inputs:
+  github_token:
+    description: "GitHub API token used to create the check run / comment."
+    default: ${{ github.token }}
+    required: false
+  github_retries:
+    description: "How many times to retry GitHub API requests (rate limits, transient errors)."
+    default: "10"
+    required: false
+  files:
+    description: "Newline-separated glob patterns of test result files. Format is auto-detected: JUnit/xUnit/NUnit/TRX XML, TAP, or Dart/Mocha JSON."
+    required: false
+  check_name:
+    description: "Name of the created check run."
+    default: "Test Results"
+    required: false
+  comment_title:
+    description: "Title for the PR comment. Defaults to check_name."
+    required: false
+  comment_mode:
+    description: '"always" or "off".'
+    default: "always"
+    required: false
+  fail_on:
+    description: 'Controls the check-run conclusion: "test failures" (fail on failures or errors), "errors" (fail only on errors), or "nothing" (always neutral/success).'
+    default: "test failures"
+    required: false
+  action_fail:
+    description: 'When "true", the action step itself fails when the conclusion is a failure (per fail_on).'
+    default: "false"
+    required: false
+  action_fail_on_inconclusive:
+    description: 'When "true", the action step itself fails when results are inconclusive (no test results).'
+    default: "false"
+    required: false
+  compare_to_earlier_commit:
+    description: 'Compare results to an earlier commit to show deltas ("true"/"false").'
+    default: "true"
+    required: false
+  report_format:
+    description: 'Summary presentation: "text" (single line) or "table" (Markdown table).'
+    default: "text"
+    required: false
+  time_unit:
+    description: 'Time unit in result files: "seconds" or "milliseconds".'
+    default: "seconds"
+    required: false
+  commit:
+    description: "Commit SHA to publish results to. Defaults to GITHUB_SHA."
+    required: false
+  check_run:
+    description: 'Publish results as a check run ("true"/"false").'
+    default: "true"
+    required: false
+  job_summary:
+    description: 'Publish results to the job summary ("true"/"false").'
+    default: "true"
+    required: false
+  json_file:
+    description: "If set, write the run stats JSON to this path."
+    required: false
+
+outputs:
+  json:
+    description: "Run statistics as JSON."
+
+runs:
+  using: "node24"
+  main: "dist/index.js"

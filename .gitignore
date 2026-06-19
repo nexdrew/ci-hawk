@@ -1,0 +1,7 @@
+node_modules/
+coverage/
+*.log
+
+# Build output is committed for JS actions (see README), but ignore while iterating
+# locally if you prefer to build in CI. Comment the next line out to commit dist/.
+# dist/

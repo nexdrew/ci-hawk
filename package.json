@@ -1,0 +1,50 @@
+{
+  "name": "@nexdrew/cinct",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fast, native, cross-platform test result reporter for CI",
+  "keywords": [
+    "github-actions",
+    "test-report",
+    "test-results",
+    "junit",
+    "xunit",
+    "report",
+    "ci"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "ncc build src/main.ts -o dist --minify --no-source-map-register",
+    "test": "node --import tsx --test test/**/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "ts-standard",
+    "lint:fix": "ts-standard --fix",
+    "coverage": "c8 --include='src/**/*.ts' --exclude='src/publish.ts' --exclude='src/github.ts' --exclude='src/comment.ts' --exclude='src/main.ts' --exclude='src/types.ts' --reporter=text --reporter=text-summary node --import tsx --test 'test/**/*.test.ts'",
+    "coverage:check": "c8 --include='src/**/*.ts' --exclude='src/publish.ts' --exclude='src/github.ts' --exclude='src/comment.ts' --exclude='src/main.ts' --exclude='src/types.ts' --check-coverage --lines 100 --functions 100 --branches 100 --statements 100 node --import tsx --test 'test/**/*.test.ts'"
+  },
+  "ts-standard": {
+    "project": "./tsconfig.json",
+    "ignore": [
+      "dist"
+    ]
+  },
+  "dependencies": {
+    "@actions/core": "^3.0.1",
+    "@actions/github": "^9.1.1",
+    "@octokit/plugin-retry": "^8.1.0",
+    "@octokit/plugin-throttling": "^11.0.3",
+    "fast-xml-parser": "^5.9.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@vercel/ncc": "^0.44.0",
+    "c8": "^11.0.0",
+    "ts-standard": "^12.0.2",
+    "tsx": "^4.19.2",
+    "typescript": "^6.0.3"
+  }
+}

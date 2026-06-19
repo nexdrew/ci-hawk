@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: Release PR
+    runs-on: ubuntu-latest
+    steps:
+      # Opens/updates a Release PR on every push to main; merging it bumps the
+      # version, updates CHANGELOG.md, and creates the tag + GitHub release.
+      # (No npm/Docker/binary publishing — cinct is consumed as `uses: nexdrew/cinct@vX`.)
+      - uses: googleapis/release-please-action@v5
+        id: release
+        with:
+          release-type: node
+          target-branch: main
+
+      # On an actual release, move the floating major and minor tags to it so
+      # consumers can pin `nexdrew/cinct@v1` or `@v1.2` as well as `@v1.2.3`.
+      - uses: actions/checkout@v7
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          fetch-depth: 0
+      - name: Update floating major/minor tags
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          MAJOR: ${{ steps.release.outputs.major }}
+          MINOR: ${{ steps.release.outputs.minor }}
+          TAG: ${{ steps.release.outputs.tag_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f "v${MAJOR}" "${TAG}"
+          git tag -f "v${MAJOR}.${MINOR}" "${TAG}"
+          git push -f origin "v${MAJOR}" "v${MAJOR}.${MINOR}"
