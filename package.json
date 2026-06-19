@@ -1,6 +1,6 @@
 {
   "name": "@nexdrew/ci-hawk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Fast, native, cross-platform test result reporter for CI",
   "keywords": [

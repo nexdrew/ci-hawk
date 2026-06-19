@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/nexdrew/ci-hawk/compare/v1.0.0...v1.0.1) (2026-06-19)
+
+
+### Bug Fixes
+
+* Rename action and package to ci-hawk ([c8b99f9](https://github.com/nexdrew/ci-hawk/commit/c8b99f995f8652b88be067d1f750cb98ee6086d3))
+
 ## 1.0.0 (2026-06-19)
 
 
