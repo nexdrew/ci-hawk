@@ -51,7 +51,8 @@ void test('defaults when no inputs are set', () => {
   assert.equal(s.compareEarlier, true)
   assert.equal(s.retries, 10)
   assert.equal(s.jsonFile, undefined)
-  assert.equal(s.commit, 'sha123')
+  // commit is an explicit override only; unset -> '' (resolved at publish time)
+  assert.equal(s.commit, '')
   assert.deepEqual(s.filesGlobs, [])
 })
 

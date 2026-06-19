@@ -5,7 +5,7 @@ import { expandFiles, parseFiles } from './collect.js'
 import { aggregate } from './results.js'
 import { getConclusion, actionFailRequired } from './conclusion.js'
 import { renderReport } from './render.js'
-import { publishToGitHub } from './publish.js'
+import { publishToGitHub, resolveCommit } from './publish.js'
 
 export async function run (): Promise<void> {
   const settings = getSettings()
@@ -26,7 +26,7 @@ export async function run (): Promise<void> {
   }
 
   const stats = aggregate(parsed, {
-    commit: settings.commit,
+    commit: resolveCommit(settings.commit),
     timeFactor: settings.timeFactor
   })
 

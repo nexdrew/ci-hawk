@@ -9,6 +9,14 @@ import type { Conclusion } from './conclusion.js'
 import type { Settings } from './settings.js'
 import type { ParsedFile, RunResults } from './types.js'
 
+interface PullRef {
+  number: number
+  baseRef: string
+  baseRepo: string
+}
+
+const PR_EVENTS = new Set(['pull_request', 'pull_request_target'])
+
 /** Safe nested property access over loosely-typed webhook payloads. */
 function getPath (obj: unknown, ...keys: string[]): unknown {
   let cur = obj
@@ -17,6 +25,38 @@ function getPath (obj: unknown, ...keys: string[]): unknown {
     cur = (cur as Record<string, unknown>)[key]
   }
   return cur
+}
+
+/**
+ * The commit results are published to. An explicit `commit` input wins;
+ * otherwise on pull_request events use the PR head SHA — GITHUB_SHA there is the
+ * synthetic merge commit, which GitHub does not surface on the PR and which
+ * isn't associated with the PR for comment lookup. All other events use
+ * GITHUB_SHA / context.sha.
+ */
+export function resolveCommit (explicit: string): string {
+  if (explicit !== '') return explicit
+  if (PR_EVENTS.has(github.context.eventName)) {
+    const head = getPath(github.context.payload, 'pull_request', 'head', 'sha')
+    if (typeof head === 'string' && head !== '') return head
+  }
+  return github.context.sha
+}
+
+/** The pull request from the triggering event payload, if present. */
+function pullFromEvent (): PullRef | undefined {
+  const pr = getPath(github.context.payload, 'pull_request')
+  const number = getPath(pr, 'number')
+  const baseRef = getPath(pr, 'base', 'ref')
+  const baseRepo = getPath(pr, 'base', 'repo', 'full_name')
+  if (
+    typeof number === 'number' &&
+    typeof baseRef === 'string' &&
+    typeof baseRepo === 'string'
+  ) {
+    return { number, baseRef, baseRepo }
+  }
+  return undefined
 }
 
 /**
@@ -146,7 +186,7 @@ async function pullsForCommit (
   owner: string,
   repo: string,
   sha: string
-): Promise<Array<{ number: number, baseRef: string, baseRepo: string }>> {
+): Promise<PullRef[]> {
   try {
     const data = await octokit.paginate(
       octokit.rest.repos.listPullRequestsAssociatedWithCommit,
@@ -172,9 +212,13 @@ async function publishComments (
   stats: RunResults
 ): Promise<void> {
   const fullName = `${owner}/${repo}`
-  const pulls = (await pullsForCommit(octokit, owner, repo, sha)).filter(
-    (p) => p.baseRepo === fullName
-  )
+  // Prefer the PR from the triggering event payload (reliable on pull_request
+  // events, where the commit-association lookup misses the merge commit); fall
+  // back to commit association for push / workflow_run.
+  const eventPull = pullFromEvent()
+  const pulls = (
+    eventPull !== undefined ? [eventPull] : await pullsForCommit(octokit, owner, repo, sha)
+  ).filter((p) => p.baseRepo === fullName)
   if (pulls.length === 0) {
     core.info(`No pull request found for commit ${sha}`)
     return
@@ -233,7 +277,7 @@ export async function publishToGitHub (
   const octokit = buildOctokit(settings.token, settings.retries)
   const { owner, repo } = github.context.repo
   const fullName = `${owner}/${repo}`
-  const sha = settings.commit !== '' ? settings.commit : github.context.sha
+  const sha = resolveCommit(settings.commit)
 
   if (isForkPullRequest(fullName)) {
     core.warning(

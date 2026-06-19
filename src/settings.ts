@@ -80,7 +80,9 @@ export function getSettings (): Settings {
     jobSummary: boolInput('job_summary', true),
     checkRun: boolInput('check_run', true),
     commentMode,
-    commit: input('commit', process.env.GITHUB_SHA ?? ''),
+    // The commit input is an explicit override only; when unset the publisher
+    // resolves the effective SHA from the event (PR head vs push) at run time.
+    commit: input('commit'),
     retries: intInput('github_retries', 10),
     failOnFailures,
     failOnErrors,
