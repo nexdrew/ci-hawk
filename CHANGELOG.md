@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/nexdrew/ci-hawk/compare/v1.0.1...v1.1.0) (2026-06-23)
+
+
+### Features
+
+* Derive PR-comment marker from `check_name` (configurable via `comment_marker`) ([#3](https://github.com/nexdrew/ci-hawk/issues/3)) ([0c5d262](https://github.com/nexdrew/ci-hawk/commit/0c5d262e47e2ee10e99a286205294ec7a02f379b))
+
 ## [1.0.1](https://github.com/nexdrew/ci-hawk/compare/v1.0.0...v1.0.1) (2026-06-19)
 
 
